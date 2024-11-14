@@ -2,7 +2,6 @@ import { catchAsyncError } from "../middlewares/catchAsyncErrors.js";
 import { User } from "../models/User.js";
 import  jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { sendToken } from "../utils/sendToken.js";
 
 export const register = catchAsyncError(async(req,res,next)=>{
 const {name,email,password}=req.body;
@@ -42,10 +41,8 @@ export const login = catchAsyncError(async(req,res,next)=>{
     if (!isPasswordValid) {
         return next(new Error("Incorrect password"));
     }
-
     // Generate JWT token (assuming JWT_SECRET is your secret key)
     const token = jwt.sign({ id: user._id,username:user.name,email:user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
     res.status(200).json({
         success: true,
         message: "Login Successful",

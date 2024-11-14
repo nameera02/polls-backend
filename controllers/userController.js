@@ -14,9 +14,14 @@ if(user) return next(new Error("User already exist"));
 const hashedPassword = await bcrypt.hash(password, 10);
 
 user = await User.create({
-    name,email,password:hashedPassword,avatar:{public_id:"tempid",url:"tempurl"},
+    name,email,password:hashedPassword
 })
-sendToken(res,user,"Registered Successfully",201)
+const token = jwt.sign({ id: user._id,username:user.name,email:user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+res.status(200).json({
+    success: true,
+    message: "Registration Successful",
+    token,  // Send token back to the frontend
+});
 });
 
 export const login = catchAsyncError(async(req,res,next)=>{
@@ -31,7 +36,6 @@ export const login = catchAsyncError(async(req,res,next)=>{
     if (!user) {
         return next(new Error("User not found"));
     }
-console.log(user);
 
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
